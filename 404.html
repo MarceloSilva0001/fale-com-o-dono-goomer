@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Fale com o dono</title>
+  <script>
+    // O GitHub Pages abre este arquivo quando o endereço não existe (ex.: /tambore).
+    // Ele manda para a página principal guardando a unidade, e a página
+    // principal volta o endereço para /tambore na barra do navegador.
+    //
+    // Site de projeto (usuario.github.io/NOME-DO-REPO/...) = 1
+    // Domínio próprio (meudominio.com.br/...) = 0
+    var PASTAS_DO_SITE = 1;
+
+    var l = window.location;
+    var partes = l.pathname.split("/");
+    var base = partes.slice(0, 1 + PASTAS_DO_SITE).join("/") + "/";
+    var resto = partes.slice(1 + PASTAS_DO_SITE).join("/");
+    l.replace(l.protocol + "//" + l.host + base + "?u=" + encodeURIComponent(resto) + l.hash);
+  </script>
+</head>
+<body></body>
+</html>

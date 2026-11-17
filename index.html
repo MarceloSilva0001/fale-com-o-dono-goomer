@@ -133,6 +133,37 @@
       letter-spacing: .02em;
     }
 
+    .unidade-nome {
+      font-size: min(2.4vh, 1.4vw);
+      letter-spacing: .12em;
+      color: var(--cream);
+      opacity: .6;
+    }
+    .unidade-nome:empty { display: none; }
+
+    /* Página geral */
+    .geral-bloco { display: none; }
+    body.geral .seta, body.geral .lado-qr { display: none; }
+    body.geral .geral-bloco {
+      display: flex;
+      flex-direction: column;
+      gap: 2vh;
+      min-width: min(420px, 90vw);
+    }
+    .aviso { color: var(--orange); font-weight: 600; font-size: 22px; letter-spacing: .04em; }
+    .lista { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; }
+    .lista a {
+      display: block;
+      padding: 14px 18px;
+      border: 2px solid var(--orange);
+      border-radius: 10px;
+      color: var(--cream);
+      text-decoration: none;
+      font-size: 20px;
+      letter-spacing: .04em;
+    }
+    .lista a:hover { background: var(--orange); color: var(--bg); }
+
     /* Tablet em pé: empilha */
     @media (orientation: portrait) {
       main { flex-direction: column; gap: 2.5vh; text-align: center; }
@@ -150,6 +181,7 @@
       #qr img, #qr canvas { width: min(38vh, 70vw); }
       .lado-qr { gap: 2vh; }
       .frase { font-size: min(2.4vh, 4.4vw); width: min(56vh, 86vw); }
+      .unidade-nome { font-size: min(1.8vh, 3.2vw); }
     }
   </style>
 </head>
@@ -176,21 +208,126 @@
     <div class="lado-qr">
       <div id="qr" role="img" aria-label="QR code da pesquisa de satisfação"></div>
       <p class="frase">Das reclamações aos elogios, gostaríamos de saber como podemos melhor lhe atender.</p>
+      <span id="unidade-nome" class="unidade-nome"></span>
+    </div>
+
+    <!-- Página geral (sem unidade no endereço) -->
+    <div class="geral-bloco">
+      <p id="aviso" class="aviso">Escolha a unidade</p>
+      <nav id="lista" class="lista"></nav>
     </div>
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
-    // Troque o link abaixo para usar em outra loja
-    const LINK = "https://nps.getin.app/GPogG7PE/qrcode";
-    new QRCode(document.getElementById("qr"), {
-      text: LINK,
-      width: 600,
-      height: 600,
-      colorDark: "#1a1310",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.M
-    });
+    // =====================================================================
+    //  UNIDADES
+    //  Cada unidade abre em: endereço-do-site/NOME-DA-UNIDADE
+    //  Ex.: .../tambore  ou  .../1
+    //  Para ativar uma unidade nova, preencha "nome" e "link" (o link do
+    //  QR code da pesquisa daquela unidade). Para trocar o endereço, troque
+    //  o texto antes dos dois pontos (só letras minúsculas, números e "-").
+    // =====================================================================
+    const UNIDADES = {
+      "tambore": { nome: "Shopping Tamboré", link: "https://nps.getin.app/GPogG7PE/qrcode" },
+      "1": { nome: "", link: "" },
+      "2": { nome: "", link: "" },
+      "3": { nome: "", link: "" },
+      "4": { nome: "", link: "" },
+      "5": { nome: "", link: "" },
+      "6": { nome: "", link: "" },
+      "7": { nome: "", link: "" },
+      "8": { nome: "", link: "" },
+      "9": { nome: "", link: "" },
+      "10": { nome: "", link: "" },
+      "11": { nome: "", link: "" },
+      "12": { nome: "", link: "" },
+      "13": { nome: "", link: "" },
+      "14": { nome: "", link: "" },
+      "15": { nome: "", link: "" },
+      "16": { nome: "", link: "" },
+      "17": { nome: "", link: "" },
+      "18": { nome: "", link: "" },
+      "19": { nome: "", link: "" },
+      "20": { nome: "", link: "" },
+      "21": { nome: "", link: "" },
+      "22": { nome: "", link: "" },
+      "23": { nome: "", link: "" },
+      "24": { nome: "", link: "" },
+      "25": { nome: "", link: "" },
+      "26": { nome: "", link: "" },
+      "27": { nome: "", link: "" },
+      "28": { nome: "", link: "" },
+      "29": { nome: "", link: "" },
+      "30": { nome: "", link: "" },
+      "31": { nome: "", link: "" },
+      "32": { nome: "", link: "" },
+      "33": { nome: "", link: "" },
+      "34": { nome: "", link: "" },
+      "35": { nome: "", link: "" },
+      "36": { nome: "", link: "" },
+      "37": { nome: "", link: "" },
+      "38": { nome: "", link: "" },
+      "39": { nome: "", link: "" },
+      "40": { nome: "", link: "" },
+      "41": { nome: "", link: "" },
+      "42": { nome: "", link: "" },
+      "43": { nome: "", link: "" },
+      "44": { nome: "", link: "" },
+      "45": { nome: "", link: "" },
+      "46": { nome: "", link: "" },
+      "47": { nome: "", link: "" },
+      "48": { nome: "", link: "" },
+      "49": { nome: "", link: "" },
+      "50": { nome: "", link: "" },
+    };
+
+    // ---------------------------------------------------------------------
+    // Daqui pra baixo não precisa mexer
+    // ---------------------------------------------------------------------
+    const normaliza = t => decodeURIComponent(t || "")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().trim();
+
+    // Endereço base do site (onde está este index.html)
+    const base = location.pathname.replace(/index\.html$/, "").replace(/\/?$/, "/");
+
+    // O 404.html manda /tambore para cá como ?u=tambore.
+    // Aqui lemos a unidade e voltamos o endereço bonito /tambore na barra.
+    const veio = (new URLSearchParams(location.search).get("u") || "").replace(/^\/+|\/+$/g, "");
+    if (veio) history.replaceState(null, "", base + veio + location.hash);
+
+    const slug = normaliza(veio.split("/").pop());
+    const temSlug = slug !== "";
+    const unidade = temSlug && Object.prototype.hasOwnProperty.call(UNIDADES, slug) ? UNIDADES[slug] : null;
+
+    if (unidade && unidade.link) {
+      document.title = "Fale com o dono | " + (unidade.nome || "Camarada Camarão");
+      document.getElementById("unidade-nome").textContent = unidade.nome;
+      new QRCode(document.getElementById("qr"), {
+        text: unidade.link,
+        width: 600,
+        height: 600,
+        colorDark: "#1a1310",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } else {
+      // Página geral: lista as unidades que já têm link
+      document.body.classList.add("geral");
+      const lista = document.getElementById("lista");
+      const ativas = Object.entries(UNIDADES).filter(([, u]) => u.link);
+      const aviso = document.getElementById("aviso");
+      if (unidade) aviso.textContent = "Esta unidade ainda não foi configurada.";
+      else if (temSlug) aviso.textContent = "Unidade não encontrada.";
+      if (ativas.length && temSlug) aviso.textContent += " Escolha a unidade:";
+      for (const [chave, u] of ativas) {
+        const a = document.createElement("a");
+        a.href = base + chave;
+        a.textContent = u.nome || chave;
+        lista.appendChild(a);
+      }
+    }
   </script>
 </body>
 </html>
