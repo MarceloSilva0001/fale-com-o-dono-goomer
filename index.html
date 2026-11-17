@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fale com o dono | Camarada Camarão</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- Mesmo estilo do display de mesa: título condensado + "Dono" em pincel -->
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Yellowtail&display=swap" rel="stylesheet">
+  <style>
+    /* Fontes oficiais do Camarada (se os arquivos estiverem na pasta fonts/) */
+    @font-face { font-family: "Westhouse"; src: url("fonts/Westhouse.ttf") format("truetype"); font-display: swap; }
+    @font-face { font-family: "Akrobat"; src: url("fonts/Akrobat-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+    :root {
+      --bg: #1a1310;      /* fundo escuro do display */
+      --bg-2: #2a1d16;
+      --cream: #f4ead9;   /* "Fale com o Dono" */
+      --orange: #e8912d;  /* faixa e texto laranja */
+      --qr: #1a1310;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: radial-gradient(ellipse at center, var(--bg-2) 0%, var(--bg) 70%);
+      color: var(--cream);
+      font-family: "Oswald", "Arial Narrow", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      text-transform: uppercase;
+    }
+
+    /* Tablet deitado: título | seta | QR | frase */
+    main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3vw;
+      width: 100%;
+      max-height: 100%;
+    }
+
+    .titulo {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 0 1 auto;
+    }
+    .fale {
+      font-family: "Akrobat", "Oswald", "Arial Narrow", sans-serif;
+      font-size: min(6vh, 3.4vw);
+      font-weight: 700;
+      letter-spacing: .04em;
+      line-height: 1;
+      display: inline-flex;
+      flex-direction: column;
+      gap: .12em;
+    }
+    /* linha laranja com a curva no final, igual ao display */
+    .fale svg {
+      width: 100%;
+      height: .45em;
+      overflow: visible;
+      color: var(--orange);
+    }
+    .dono {
+      font-family: "Westhouse", "Yellowtail", cursive;
+      text-transform: none;
+      font-size: min(22vh, 12vw);
+      line-height: .95;
+      margin-top: -.05em;
+    }
+    .faixa {
+      margin-top: 2vh;
+      background: var(--orange);
+      color: var(--bg);
+      font-weight: 600;
+      font-size: min(3.4vh, 1.9vw);
+      line-height: 1.15;
+      letter-spacing: .03em;
+      padding: .6em .9em;
+      max-width: 15em;
+    }
+
+    .seta {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .6vh;
+      color: var(--orange);
+    }
+    .seta span {
+      font-family: "Yellowtail", cursive;
+      text-transform: none;
+      font-size: min(5.5vh, 3vw);
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .seta svg {
+      width: min(13vh, 7.5vw);
+      height: auto;
+      animation: empurra 1.4s ease-in-out infinite;
+    }
+    @keyframes empurra {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(10px); }
+    }
+
+    #qr {
+      flex: 0 0 auto;
+      background: #fff;
+      padding: min(2.6vh, 1.6vw);
+      border-radius: 16px;
+    }
+    #qr img, #qr canvas { display: block; width: min(58vh, 36vw); height: auto; }
+
+    .lado-qr {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5vh;
+    }
+    .frase {
+      width: min(68vh, 42vw);
+      text-align: center;
+      color: var(--orange);
+      font-weight: 600;
+      font-size: min(3.4vh, 1.9vw);
+      line-height: 1.25;
+      letter-spacing: .02em;
+    }
+
+    /* Tablet em pé: empilha */
+    @media (orientation: portrait) {
+      main { flex-direction: column; gap: 2.5vh; text-align: center; }
+      .titulo { align-items: center; }
+      .fale { font-size: min(4vh, 7vw); }
+      .dono { font-size: min(13vh, 24vw); }
+      .faixa { font-size: min(2.4vh, 4.2vw); max-width: none; }
+      .seta { flex-direction: row; gap: 2vw; }
+      .seta span { font-size: min(4vh, 7vw); }
+      .seta svg { width: min(6vh, 11vw); transform: rotate(90deg); animation-name: desce; }
+      @keyframes desce {
+        0%, 100% { transform: rotate(90deg) translateX(0); }
+        50% { transform: rotate(90deg) translateX(8px); }
+      }
+      #qr img, #qr canvas { width: min(38vh, 70vw); }
+      .lado-qr { gap: 2vh; }
+      .frase { font-size: min(2.4vh, 4.4vw); width: min(56vh, 86vw); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="titulo">
+      <span class="fale">Fale com o
+        <svg viewBox="0 0 200 20" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 5 H150 C160 5 164 8 166 17 C169 8 176 5 186 5 H198" />
+        </svg>
+      </span>
+      <span class="dono">Dono</span>
+      <span class="faixa">Nos conte como foi a sua experiência</span>
+    </div>
+
+    <div class="seta" aria-hidden="true">
+      <span>avalie aqui</span>
+      <svg viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 30 H108" />
+        <path d="M86 8 L110 30 L86 52" />
+      </svg>
+    </div>
+
+    <div class="lado-qr">
+      <div id="qr" role="img" aria-label="QR code da pesquisa de satisfação"></div>
+      <p class="frase">Das reclamações aos elogios, gostaríamos de saber como podemos melhor lhe atender.</p>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    // Troque o link abaixo para usar em outra loja
+    const LINK = "https://nps.getin.app/GPogG7PE/qrcode";
+    new QRCode(document.getElementById("qr"), {
+      text: LINK,
+      width: 600,
+      height: 600,
+      colorDark: "#1a1310",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  </script>
+</body>
+</html>
