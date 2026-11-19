@@ -1,0 +1,3 @@
+# Cloudflare Pages: /tambore, /mocca... abrem a página principal direto (sem 404).
+# Arquivos que existem (lojas.json, fonts/...) continuam sendo servidos normalmente.
+/:slug  /  200

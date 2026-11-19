@@ -233,13 +233,20 @@
       .normalize("NFD").replace(/[̀-ͯ]/g, "")
       .toLowerCase().trim();
 
-    // Endereço base do site (onde está este index.html)
-    const base = location.pathname.replace(/index\.html$/, "").replace(/\/?$/, "/");
+    // Endereço base do site (onde está este index.html):
+    //  - usuario.github.io/NOME-DO-REPO/  -> 1 pasta antes da loja
+    //  - *.pages.dev ou domínio próprio   -> nenhuma pasta
+    const PASTAS_DO_SITE = /\.github\.io$/i.test(location.hostname) ? 1 : 0;
+    const partes = location.pathname.split("/");
+    const base = partes.slice(0, 1 + PASTAS_DO_SITE).join("/") + "/";
+    const doCaminho = partes.slice(1 + PASTAS_DO_SITE).join("/").replace(/index\.html$/, "");
 
-    // O 404.html manda /tambore para cá como ?u=tambore.
-    // Aqui lemos a loja e voltamos o endereço bonito /tambore na barra.
-    const veio = (new URLSearchParams(location.search).get("u") || "").replace(/^\/+|\/+$/g, "");
-    if (veio) history.replaceState(null, "", base + veio + location.hash);
+    // No Cloudflare, /tambore abre esta página direto (arquivo _redirects).
+    // No GitHub Pages, o 404.html manda /tambore para cá como ?u=tambore;
+    // aqui lemos a loja e voltamos o endereço bonito /tambore na barra.
+    const doU = new URLSearchParams(location.search).get("u");
+    const veio = (doU !== null ? doU : doCaminho).replace(/^\/+|\/+$/g, "");
+    if (doU !== null) history.replaceState(null, "", base + veio + location.hash);
 
     const slug = normaliza(veio.split("/").pop());
     const temSlug = slug !== "";
