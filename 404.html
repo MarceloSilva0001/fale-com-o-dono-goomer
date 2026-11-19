@@ -4,13 +4,14 @@
   <meta charset="utf-8">
   <title>Fale com o dono</title>
   <script>
-    // O GitHub Pages abre este arquivo quando o endereço não existe (ex.: /tambore).
-    // Ele manda para a página principal guardando a unidade, e a página
-    // principal volta o endereço para /tambore na barra do navegador.
+    // O GitHub Pages e o Cloudflare Pages abrem este arquivo quando o endereço
+    // não existe (ex.: /tambore). Ele manda para a página principal guardando
+    // a loja, e a página principal volta o endereço para /tambore na barra.
     //
-    // Site de projeto (usuario.github.io/NOME-DO-REPO/...) = 1
-    // Domínio próprio (meudominio.com.br/...) = 0
-    var PASTAS_DO_SITE = 1;
+    // Quantas pastas vêm antes da loja no endereço:
+    //  - usuario.github.io/NOME-DO-REPO/tambore  -> 1 (detectado sozinho)
+    //  - domínio próprio ou *.pages.dev/tambore  -> 0
+    var PASTAS_DO_SITE = /\.github\.io$/i.test(window.location.hostname) ? 1 : 0;
 
     var l = window.location;
     var partes = l.pathname.split("/");

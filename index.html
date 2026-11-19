@@ -221,110 +221,64 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     // =====================================================================
-    //  UNIDADES
-    //  Cada unidade abre em: endereço-do-site/NOME-DA-UNIDADE
-    //  Ex.: .../tambore  ou  .../1
-    //  Para ativar uma unidade nova, preencha "nome" e "link" (o link do
-    //  QR code da pesquisa daquela unidade). Para trocar o endereço, troque
-    //  o texto antes dos dois pontos (só letras minúsculas, números e "-").
+    //  LOJAS
+    //  As lojas ficam no arquivo lojas.json (na mesma pasta deste index.html).
+    //  Cada loja abre em: endereço-do-site/SLUG   (ex.: .../tambore)
+    //  Para cadastrar uma loja, acrescente uma linha no lojas.json:
+    //    { "slug": "mocca", "nome": "Shopping Mocca", "link": "https://..." }
+    //  slug: só letras minúsculas, números e "-".  link: o link da pesquisa.
     // =====================================================================
-    const UNIDADES = {
-      "tambore": { nome: "Shopping Tamboré", link: "https://nps.getin.app/GPogG7PE/qrcode" },
-      "1": { nome: "", link: "" },
-      "2": { nome: "", link: "" },
-      "3": { nome: "", link: "" },
-      "4": { nome: "", link: "" },
-      "5": { nome: "", link: "" },
-      "6": { nome: "", link: "" },
-      "7": { nome: "", link: "" },
-      "8": { nome: "", link: "" },
-      "9": { nome: "", link: "" },
-      "10": { nome: "", link: "" },
-      "11": { nome: "", link: "" },
-      "12": { nome: "", link: "" },
-      "13": { nome: "", link: "" },
-      "14": { nome: "", link: "" },
-      "15": { nome: "", link: "" },
-      "16": { nome: "", link: "" },
-      "17": { nome: "", link: "" },
-      "18": { nome: "", link: "" },
-      "19": { nome: "", link: "" },
-      "20": { nome: "", link: "" },
-      "21": { nome: "", link: "" },
-      "22": { nome: "", link: "" },
-      "23": { nome: "", link: "" },
-      "24": { nome: "", link: "" },
-      "25": { nome: "", link: "" },
-      "26": { nome: "", link: "" },
-      "27": { nome: "", link: "" },
-      "28": { nome: "", link: "" },
-      "29": { nome: "", link: "" },
-      "30": { nome: "", link: "" },
-      "31": { nome: "", link: "" },
-      "32": { nome: "", link: "" },
-      "33": { nome: "", link: "" },
-      "34": { nome: "", link: "" },
-      "35": { nome: "", link: "" },
-      "36": { nome: "", link: "" },
-      "37": { nome: "", link: "" },
-      "38": { nome: "", link: "" },
-      "39": { nome: "", link: "" },
-      "40": { nome: "", link: "" },
-      "41": { nome: "", link: "" },
-      "42": { nome: "", link: "" },
-      "43": { nome: "", link: "" },
-      "44": { nome: "", link: "" },
-      "45": { nome: "", link: "" },
-      "46": { nome: "", link: "" },
-      "47": { nome: "", link: "" },
-      "48": { nome: "", link: "" },
-      "49": { nome: "", link: "" },
-      "50": { nome: "", link: "" },
-    };
 
-    // ---------------------------------------------------------------------
-    // Daqui pra baixo não precisa mexer
-    // ---------------------------------------------------------------------
     const normaliza = t => decodeURIComponent(t || "")
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
       .toLowerCase().trim();
 
     // Endereço base do site (onde está este index.html)
     const base = location.pathname.replace(/index\.html$/, "").replace(/\/?$/, "/");
 
     // O 404.html manda /tambore para cá como ?u=tambore.
-    // Aqui lemos a unidade e voltamos o endereço bonito /tambore na barra.
+    // Aqui lemos a loja e voltamos o endereço bonito /tambore na barra.
     const veio = (new URLSearchParams(location.search).get("u") || "").replace(/^\/+|\/+$/g, "");
     if (veio) history.replaceState(null, "", base + veio + location.hash);
 
     const slug = normaliza(veio.split("/").pop());
     const temSlug = slug !== "";
-    const unidade = temSlug && Object.prototype.hasOwnProperty.call(UNIDADES, slug) ? UNIDADES[slug] : null;
 
-    if (unidade && unidade.link) {
-      document.title = "Fale com o dono | " + (unidade.nome || "Camarada Camarão");
-      document.getElementById("unidade-nome").textContent = unidade.nome;
-      new QRCode(document.getElementById("qr"), {
-        text: unidade.link,
-        width: 600,
-        height: 600,
-        colorDark: "#1a1310",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    } else {
-      // Página geral: lista as unidades que já têm link
+    fetch(base + "lojas.json", { cache: "no-cache" })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(mostra)
+      .catch(() => mostra(null));
+
+    function mostra(lojas) {
+      lojas = Array.isArray(lojas) ? lojas.filter(l => l && l.slug) : [];
+      const loja = temSlug ? lojas.find(l => normaliza(String(l.slug)) === slug) : null;
+
+      if (loja && loja.link) {
+        document.title = "Fale com o dono | " + (loja.nome || "Camarada Camarão");
+        document.getElementById("unidade-nome").textContent = loja.nome || "";
+        new QRCode(document.getElementById("qr"), {
+          text: loja.link,
+          width: 600,
+          height: 600,
+          colorDark: "#1a1310",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        return;
+      }
+
+      // Página geral: lista as lojas que já têm link
       document.body.classList.add("geral");
       const lista = document.getElementById("lista");
-      const ativas = Object.entries(UNIDADES).filter(([, u]) => u.link);
+      const ativas = lojas.filter(l => l.link);
       const aviso = document.getElementById("aviso");
-      if (unidade) aviso.textContent = "Esta unidade ainda não foi configurada.";
+      if (loja) aviso.textContent = "Esta unidade ainda não foi configurada.";
       else if (temSlug) aviso.textContent = "Unidade não encontrada.";
       if (ativas.length && temSlug) aviso.textContent += " Escolha a unidade:";
-      for (const [chave, u] of ativas) {
+      for (const l of ativas) {
         const a = document.createElement("a");
-        a.href = base + chave;
-        a.textContent = u.nome || chave;
+        a.href = base + encodeURIComponent(l.slug);
+        a.textContent = l.nome || l.slug;
         lista.appendChild(a);
       }
     }
